@@ -1,23 +1,55 @@
 from app import app
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request, redirect, jsonify
 import os
 import psycopg2
+from google.cloud import storage
 # from google.cloud import storage
 from psycopg2 import sql, OperationalError
 
+
+# Google Cloud Storage bucket name
+GCP_BUCKET_NAME = "my-bucket-0511"
+
 # Database connection details (replace with your values)
-DB_HOST = "34.122.217.200"
+DB_HOST = "34.72.76.71"
 DB_NAME = "myappdb"
 DB_USER = "myuser"
 DB_PASSWORD = 'mypassword'
+
+
+# Initialize the Google Cloud Storage client
+def upload_to_gcp_bucket(file, bucket_name):
+    """Uploads a file to the given GCP bucket."""
+    try:
+        # Create a storage client
+        storage_client = storage.Client()
+
+        # Get the bucket
+        bucket = storage_client.bucket(bucket_name)
+
+        # Create a new blob and upload the file's content
+        blob = bucket.blob(file.filename)
+        blob.upload_from_file(file)
+
+        # Make the blob publicly accessible (optional)
+        blob.make_public()
+
+        return blob.public_url
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return None
 
 # Route to insert data into the database
 @app.route("/insert", methods=['POST'])
 def insert_data():
     if request.method == 'POST':
         # Get form data
-        name = request.form['name']
-        gender = request.form['gender']
+        name = request.form.get('name')
+        gender = request.form.get('gender')
+
+        # Check if form data is complete
+        if not name or not gender:
+            return jsonify({"error": "Missing name or gender"}), 400  # 400 Bad Request
 
         # Insert form data into the database
         try:
@@ -38,10 +70,10 @@ def insert_data():
             cursor.close()
             conn.close()
 
-            return redirect('/fetch')  # Redirect to the fetch route to see the updated data
+            return jsonify({"message": "Data inserted successfully!"}), 201  # 201 Created
 
         except Exception as e:
-            return f"An error occurred: {e}"
+            return jsonify({"error": str(e)}), 500  # 500 Internal Server Error
 
 # Route to fetch data from the database
 @app.route("/fetch", methods=['GET'])
@@ -63,12 +95,52 @@ def fetch_data():
         # Close the connection
         cursor.close()
         conn.close()
+        
+        
+     
 
     except Exception as e:
         users = []
-        print(f"Error fetching users: {e}")
+        print(jsonify({"error": e}), 500 )
+        
+    
+    if not users:  # Check if the users list is empty
+        message = "No users found."
+    else:
+        message = ""  # Return an empty string if users are found
 
-    return render_template("index.html", users=users)
+    return jsonify({"Users": users, "message": message}), 200 
+
+
+
+@app.route("/upload-to-bucket", methods=['GET', 'POST'])
+def upload_to_bucket():
+    if request.method == 'POST':
+        # Check if the post request has the file part
+        if 'file' not in request.files:
+            return jsonify({"error": "No file part"}), 400
+        
+        file = request.files['file']
+
+        # If no file is selected
+        if file.filename == '':
+            return jsonify({"error": "No selected file"}), 400 
+
+        if file:
+            # Upload file to GCP bucket
+            public_url = upload_to_gcp_bucket(file, GCP_BUCKET_NAME)
+
+            if public_url:
+                return jsonify({"message": "File uploaded successfully!", "url": public_url}), 200 
+            else:
+                return jsonify({"error": "Failed to upload file"}), 500 
+
+
+
+
+
+
+
 
 def check_db_connection():
     try:
