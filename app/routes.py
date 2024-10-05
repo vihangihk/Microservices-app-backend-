@@ -63,6 +63,14 @@ def insert_data():
             cursor = conn.cursor()
 
             # Insert the data into your table (replace 'users' with your table name)
+            cursor.execute("""
+    CREATE TABLE IF NOT EXISTS users (
+        id SERIAL PRIMARY KEY,
+        name VARCHAR(100),
+        gender VARCHAR(10)
+    );
+""")
+
             cursor.execute("INSERT INTO users (name, gender) VALUES (%s, %s)", (name, gender))
             conn.commit()
 
@@ -117,6 +125,7 @@ def fetch_data():
 def upload_to_bucket():
     if request.method == 'POST':
         # Check if the post request has the file part
+        print(request.files)
         if 'file' not in request.files:
             return jsonify({"error": "No file part"}), 400
         
