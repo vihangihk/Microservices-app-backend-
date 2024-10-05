@@ -3,7 +3,6 @@ from flask import Flask, render_template, request, redirect, jsonify
 import os
 import psycopg2
 from google.cloud import storage
-# from google.cloud import storage
 from psycopg2 import sql, OperationalError
 
 
@@ -31,13 +30,13 @@ def upload_to_gcp_bucket(file, bucket_name):
         blob = bucket.blob(file.filename)
         blob.upload_from_file(file)
 
-        # Make the blob publicly accessible (optional)
-        blob.make_public()
+        # Return the blob's public URL based on the bucket's permissions
+        return f"https://storage.googleapis.com/{bucket_name}/{file.filename}"
 
-        return blob.public_url
     except Exception as e:
         print(f"An error occurred: {e}")
         return None
+
 
 # Route to insert data into the database
 @app.route("/insert", methods=['POST'])
