@@ -1,40 +1,34 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: mypythonapp
+  name: flask-app
+  labels:
+    app: flask-app
 spec:
-  replicas: 2
+  replicas: 3 # Number of desired replicas
   selector:
     matchLabels:
-      app: mypythonapp
+      app: flask-app
   template:
     metadata:
       labels:
-        app: mypythonapp
+        app: flask-app
     spec:
       containers:
-        - name: mypythonapp
-          image: gcr.io/quantum-star-435523-g9/mypythonapp:latest
+        - name: flask-app
+          image: gcr.io/quantum-star-435523-g9/flask-app-backend:latest
           ports:
             - containerPort: 5000
           env:
-            - name: DB_HOST
-              valueFrom:
-                secretKeyRef:
-                  name: db-credentials
-                  key: DB_HOST
-            - name: DB_NAME
-              valueFrom:
-                secretKeyRef:
-                  name: db-credentials
-                  key: DB_NAME
-            - name: DB_USER
-              valueFrom:
-                secretKeyRef:
-                  name: db-credentials
-                  key: DB_USER
-            - name: DB_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: db-credentials
-                  key: DB_PASSWORD
+            - name: GOOGLE_APPLICATION_CREDENTIALS
+              value: "/app/quantum-star-435523-g9-1d6e0f9df362.json"
+          volumeMounts:
+            - name: gcp-service-account-volume
+              mountPath: /app/quantum-star-435523-g9-1d6e0f9df362.json
+              subPath: quantum-star-435523-g9-1d6e0f9df362.json
+      volumes:
+        - name: gcp-service-account-volume
+          secret:
+            secretName: gcp-service-account-secret
+      imagePullSecrets:
+        - name: gcr-json-key
