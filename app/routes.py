@@ -2,18 +2,21 @@ from app import app
 from flask import Flask, render_template, request, redirect, jsonify
 import os
 import psycopg2
+from dotenv import load_dotenv
 from google.cloud import storage
 from psycopg2 import sql, OperationalError
 
-
+load_dotenv()
 # Google Cloud Storage bucket name
 GCP_BUCKET_NAME = "my-bucket-0511"
 
+
+
 # Database connection details (replace with your values)
-DB_HOST = "34.72.76.71"
-DB_NAME = "myappdb"
-DB_USER = "myuser"
-DB_PASSWORD = 'mypassword'
+DB_HOST = os.environ["DB_HOST"]
+DB_NAME = os.environ["DB_NAME"]
+DB_USER = os.environ["DB_USER"]
+DB_PASSWORD = os.environ["DB_PASSWORD"]
 
 
 # Initialize the Google Cloud Storage client
