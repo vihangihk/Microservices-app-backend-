@@ -1,5 +1,4 @@
-from app import app
-from flask import Flask, render_template, request, redirect, jsonify
+from flask import request, jsonify, current_app
 import os
 import psycopg2
 from dotenv import load_dotenv
@@ -42,7 +41,7 @@ def upload_to_gcp_bucket(file, bucket_name):
 
 
 # Route to insert data into the database
-@app.route("/insert", methods=['POST'])
+@current_app.route("/insert", methods=['POST'])
 def insert_data():
     if request.method == 'POST':
         # Get form data
@@ -86,7 +85,7 @@ def insert_data():
             return jsonify({"error": str(e)}), 500  # 500 Internal Server Error
 
 # Route to fetch data from the database
-@app.route("/fetch", methods=['GET'])
+@current_app.route("/fetch", methods=['GET'])
 def fetch_data():
     # Fetch users from the database
     try:
@@ -123,7 +122,7 @@ def fetch_data():
 
 
 
-@app.route("/upload-to-bucket", methods=['GET', 'POST'])
+@current_app.route("/upload-to-bucket", methods=['GET', 'POST'])
 def upload_to_bucket():
     if request.method == 'POST':
         # Check if the post request has the file part
@@ -148,6 +147,68 @@ def upload_to_bucket():
 
 
 
+def insert_message(message_text):
+    try:
+        conn = psycopg2.connect(
+            host=DB_HOST,
+            dbname=DB_NAME,
+            user=DB_USER,
+            password=DB_PASSWORD
+        )
+        cursor = conn.cursor()
+
+        # Insert message data into the 'message' table
+        cursor.execute("INSERT INTO message (message) VALUES (%s)", (message_text,))
+        
+        # Commit the transaction
+        conn.commit()
+        
+        # Close the connection
+        cursor.close()
+        conn.close()
+        
+        print("Message inserted successfully.")
+        
+    except Exception as e:
+        print(f"Error inserting message: {e}")
+
+
+
+@current_app.route('/get-messages', methods=['GET'])
+def get_messages():
+    try:
+        conn = psycopg2.connect(
+            host=DB_HOST,
+            dbname=DB_NAME,
+            user=DB_USER,
+            password=DB_PASSWORD
+        )
+        cursor = conn.cursor()
+
+        # Retrieve all messages from the 'message' table
+        cursor.execute("SELECT id, message, timestamp FROM message")
+        messages = cursor.fetchall()
+
+        # Close the connection
+        cursor.close()
+        conn.close()
+
+        # Format the messages as a list of dictionaries
+        messages_list = [
+            {"id": msg[0], "message": msg[1], "timestamp": msg[2]}
+            for msg in messages
+        ]
+
+    except Exception as e:
+        print(f"Error fetching messages: {e}")
+        return jsonify({"error": str(e)}), 500
+
+    return jsonify({"messages": messages_list}), 200
+    messages = Message.query.all()
+    messages_list = []
+    for message in messages:
+        messages_list.current_append({'id': message.id, 'message': message.message, 'timestamp': message.timestamp})
+    return jsonify({'messages': messages_list})
 
 
 

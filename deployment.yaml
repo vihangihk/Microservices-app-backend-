@@ -5,7 +5,7 @@ metadata:
   labels:
     app: flask-app
 spec:
-  replicas: 3 # Number of desired replicas
+  replicas: 3
   selector:
     matchLabels:
       app: flask-app
@@ -16,19 +16,22 @@ spec:
     spec:
       containers:
         - name: flask-app
-          image: gcr.io/quantum-star-435523-g9/flask-app-backend:latest
+          image: gcr.io/quantum-star-435523-g9/backend-suscriber:latest
           ports:
             - containerPort: 5000
           env:
             - name: GOOGLE_APPLICATION_CREDENTIALS
-              value: "/app/quantum-star-435523-g9-1d6e0f9df362.json"
+              value: "/app/gcp-credentials/service-account.json"
           volumeMounts:
             - name: gcp-service-account-volume
-              mountPath: /app/quantum-star-435523-g9-1d6e0f9df362.json
-              subPath: quantum-star-435523-g9-1d6e0f9df362.json
+              mountPath: /app/gcp-credentials
+              readOnly: true
       volumes:
         - name: gcp-service-account-volume
           secret:
             secretName: gcp-service-account-secret
+            items:
+              - key: service-account.json
+                path: service-account.json
       imagePullSecrets:
         - name: gcr-json-key
