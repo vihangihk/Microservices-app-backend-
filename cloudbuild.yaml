@@ -20,6 +20,6 @@ steps:
       - "CLOUDSDK_CONTAINER_CLUSTER=${_CLUSTER_NAME}"
 substitutions:
   _ZONE: "us-central1-a"
-  _CLUSTER_NAME: "my-cluster"
+  _CLUSTER_NAME: "backend-cluster"
 options:
   logging: CLOUD_LOGGING_ONLY
