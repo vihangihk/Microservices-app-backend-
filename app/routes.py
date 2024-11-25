@@ -1,24 +1,25 @@
-from flask import request, jsonify, current_app
+from flask import Flask ,request, jsonify
+from app import app
 import os
 import psycopg2
 from dotenv import load_dotenv
 from google.cloud import storage
 from psycopg2 import sql, OperationalError
 
+credential_path = "E:\OneDrive - Lambton College\Desktop\Inclass 4\Microservices-app-backend-"
+os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = credential_path
+
 load_dotenv()
+
 # Google Cloud Storage bucket name
 GCP_BUCKET_NAME = "my-bucket-0511"
 
-
-
-# Database connection details (replace with your values)
+# Database connection details
 DB_HOST = os.environ["DB_HOST"]
 DB_NAME = os.environ["DB_NAME"]
 DB_USER = os.environ["DB_USER"]
 DB_PASSWORD = os.environ["DB_PASSWORD"]
 
-
-# Initialize the Google Cloud Storage client
 def upload_to_gcp_bucket(file, bucket_name):
     """Uploads a file to the given GCP bucket."""
     try:
@@ -41,7 +42,7 @@ def upload_to_gcp_bucket(file, bucket_name):
 
 
 # Route to insert data into the database
-@current_app.route("/insert", methods=['POST'])
+@app.route("/insert", methods=['POST'])
 def insert_data():
     if request.method == 'POST':
         # Get form data
@@ -85,7 +86,7 @@ def insert_data():
             return jsonify({"error": str(e)}), 500  # 500 Internal Server Error
 
 # Route to fetch data from the database
-@current_app.route("/fetch", methods=['GET'])
+@app.route("/fetch", methods=['GET'])
 def fetch_data():
     # Fetch users from the database
     try:
@@ -122,7 +123,7 @@ def fetch_data():
 
 
 
-@current_app.route("/upload-to-bucket", methods=['GET', 'POST'])
+@app.route("/upload-to-bucket", methods=['GET', 'POST'])
 def upload_to_bucket():
     if request.method == 'POST':
         # Check if the post request has the file part
@@ -174,7 +175,7 @@ def insert_message(message_text):
 
 
 
-@current_app.route('/get-messages', methods=['GET'])
+@app.route('/get-messages', methods=['GET'])
 def get_messages():
     try:
         conn = psycopg2.connect(

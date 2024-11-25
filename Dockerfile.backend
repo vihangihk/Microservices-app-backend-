@@ -5,7 +5,7 @@ WORKDIR /app
 COPY . .
 
 # Set the environment variable for the Google application credentials
-ENV GOOGLE_APPLICATION_CREDENTIALS=quantum-star-435523-g9-1d6e0f9df362.json
+ENV GOOGLE_APPLICATION_CREDENTIALS=application-credentials.json
 
 # Install dependencies
 RUN pip install flask -r requirements.txt
