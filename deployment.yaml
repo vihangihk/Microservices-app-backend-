@@ -3,7 +3,7 @@ kind: Namespace
 metadata:
   name: backend-app
   labels:
-    name: backend-app
+    name: backend-app #namespace
 
 ---
 apiVersion: v1
