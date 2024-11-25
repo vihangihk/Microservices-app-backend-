@@ -35,7 +35,7 @@ spec:
     spec:
       containers:
         - name: backend-app
-          image: gcr.io/gitlab-441915/backend-app:2706dc2
+          image: gcr.io/gitlab-441915/backend-app:latest
           ports:
             - containerPort: 5000
       imagePullSecrets:
