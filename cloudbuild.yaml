@@ -12,7 +12,7 @@ steps:
         "set",
         "image",
         "deployment/backend-app",
-        "frontend-app=gcr.io/gitlab-441915/backend-app:$SHORT_SHA", # Changed from 'frontend' to 'frontend-app'
+        "backend-app=gcr.io/gitlab-441915/backend-app:$SHORT_SHA", # Changed from 'frontend' to 'frontend-app'
         "--namespace=backend-app",
       ]
     env:
