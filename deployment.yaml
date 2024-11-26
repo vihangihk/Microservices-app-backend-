@@ -6,6 +6,20 @@ metadata:
     name: backend-app
 
 ---
+
+apiVersion: v1
+data:
+  DB_HOST: MzQuNDIuMjQ0LjQz
+  DB_NAME: Zmxhc2thcHBkYg==
+  DB_PASSWORD: cGFzc3dvcmQ=
+  DB_USER: YXBwdXNlcg==
+kind: Secret
+metadata:
+  creationTimestamp: null
+  name: db-crendiatials
+  namespace: backend-app
+
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -26,8 +40,27 @@ spec:
       containers:
         - name: backend-app
           image: gcr.io/gitlab-441915/backend-app:latest
-          ports:
-            - containerPort: 5000
+          env:
+          - name: DB_HOST
+            valueFrom:
+              secretKeyRef: 
+                name: db-crendiatials
+                key: DB_HOST
+          - name: DB_NAME
+            valueFrom:
+              secretKeyRef:
+                name: db-crendiatials
+                key: DB_NAME
+          - name: DB_USER
+            valueFrom:
+              secretKeyRef:
+                name: db-crendiatials
+                key: DB_USER
+          - name: DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: db-crendiatials
+                key: DB_PASSWORD
       imagePullSecrets:
         - name: gcr-json-key
 
