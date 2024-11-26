@@ -18,6 +18,8 @@ steps:
     env:
       - "CLOUDSDK_COMPUTE_ZONE=${_ZONE}"
       - "CLOUDSDK_CONTAINER_CLUSTER=${_CLUSTER_NAME}"
+images:
+  - "gcr.io/gitlab-441915/backend-app:$SHORT_SHA"
 substitutions:
   _ZONE: "us-central1-a"
   _CLUSTER_NAME: "app-cluster"
